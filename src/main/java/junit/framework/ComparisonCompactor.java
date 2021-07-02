@@ -9,6 +9,9 @@ public class ComparisonCompactor {
     private int fContextLength;
     private String expected;
     private String actual;
+    private  String compactExpected;
+    private String compactActual;
+
     private int prefix;
     private int suffix;
 
@@ -21,14 +24,18 @@ public class ComparisonCompactor {
     @SuppressWarnings("deprecation")
     public String formatCompactedComparison(String message) {
         if (canBeCompacted()) {
-            findCommonPrefix();
-            findCommonSuffix();
-            String compactExpected = compactString(expected);
-            String compactActual = compactString(actual);
+           compactExpectedAndActual();
             return Assert.format(message, compactExpected, compactActual);
         } else {
             return Assert.format(message, expected, actual);
         }
+    }
+
+    private void compactExpectedAndActual() {
+        findCommonPrefix();
+        findCommonSuffix();
+        compactExpected = compactString(expected);
+        compactActual = compactString(actual);
     }
 
     private boolean canBeCompacted() {
