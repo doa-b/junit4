@@ -33,7 +33,7 @@ public class ComparisonFailure extends AssertionFailedError {
      */
     @Override
     public String getMessage() {
-        return new ComparisonCompactor(MAX_CONTEXT_LENGTH, fExpected, fActual).compact(super.getMessage());
+        return new ComparisonCompactor(MAX_CONTEXT_LENGTH, fExpected, fActual).formatCompactedComparison(super.getMessage());
     }
 
     /**
