@@ -22,7 +22,7 @@ public class ComparisonCompactor {
 
     @SuppressWarnings("deprecation")
     public String formatCompactedComparison(String message) {
-        if (canBeCompacted()) {
+        if (shouldBeCompacted()) {
             compactExpectedAndActual();
             return Assert.format(message, compactExpected, compactActual);
         } else {
@@ -36,8 +36,12 @@ public class ComparisonCompactor {
         compactActual = compactString(actual);
     }
 
-    private boolean canBeCompacted() {
-        return expected != null && actual != null && !areStringsEqual();
+    private boolean shouldBeCompacted() {
+        return !shouldNotBeCompacted();
+    }
+
+    private boolean shouldNotBeCompacted() {
+        return expected == null || actual == null || expected.equals(actual);
     }
 
     private String compactString(String source) {
@@ -46,6 +50,19 @@ public class ComparisonCompactor {
                 source.substring(prefixLength, source.length() - suffixLength) +
                 DELTA_END +
                 computeCommonSuffix();
+    }
+
+    private void findCommonPrefixAndSuffix() {
+        findCommonPrefix();
+        suffixLength = 0;
+        for (; !suffixOverlapsPrefix(); suffixLength++) {
+            if (charFromEnd(expected, suffixLength) != charFromEnd(actual, suffixLength)) break;
+        }
+    }
+
+    private boolean suffixOverlapsPrefix() {
+        return actual.length() - suffixLength <= prefixLength ||
+                expected.length() - suffixLength <= prefixLength;
     }
 
     private void findCommonPrefix() {
@@ -58,26 +75,11 @@ public class ComparisonCompactor {
         }
     }
 
-    private void findCommonPrefixAndSuffix() {
-        findCommonPrefix();
-        suffixLength = 0;
-        for (; !suffixOverlapsPrefix(suffixLength); suffixLength++) {
-            if (charFromEnd(expected, suffixLength) != charFromEnd(actual, suffixLength)) break;
-        }
-       for (; !suffixOverlapsPrefix(suffixLength); suffixLength++) {
-           if(charFromEnd(expected, suffixLength) != charFromEnd(actual, suffixLength))
-               break;
-        }
-    }
-
     private char charFromEnd(String s, int i) {
         return s.charAt((s.length() - i - 1));
     }
 
-    private boolean suffixOverlapsPrefix(int suffixLength) {
-        return actual.length() - suffixLength <= prefixLength ||
-                expected.length() - suffixLength <= prefixLength;
-    }
+
 
     private String computeCommonPrefix() {
         return (prefixLength > contextLength ? ELLIPSIS : "") + expected.substring(Math.max(0, prefixLength - contextLength), prefixLength);
