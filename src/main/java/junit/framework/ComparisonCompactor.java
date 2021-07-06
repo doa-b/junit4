@@ -9,8 +9,6 @@ public class ComparisonCompactor {
     private int contextLength;
     private String expected;
     private String actual;
-    private String compactExpected;
-    private String compactActual;
     private int prefixLength;
     private int suffixLength;
 
@@ -22,18 +20,14 @@ public class ComparisonCompactor {
 
     @SuppressWarnings("deprecation")
     public String formatCompactedComparison(String message) {
+        String compactExpected = expected;
+        String compactActual = actual;
         if (shouldBeCompacted()) {
-            compactExpectedAndActual();
-            return Assert.format(message, compactExpected, compactActual);
-        } else {
-            return Assert.format(message, expected, actual);
+            findCommonPrefixAndSuffix();
+            compactExpected = compact(expected);
+            compactActual = compact(actual);
         }
-    }
-
-    private void compactExpectedAndActual() {
-        findCommonPrefixAndSuffix();
-        compactExpected = compactString(expected);
-        compactActual = compactString(actual);
+        return Assert.format(message, compactExpected, compactActual);
     }
 
     private boolean shouldBeCompacted() {
@@ -80,7 +74,6 @@ public class ComparisonCompactor {
     }
 
 
-
     private String computeCommonPrefix() {
         return (prefixLength > contextLength ? ELLIPSIS : "") + expected.substring(Math.max(0, prefixLength - contextLength), prefixLength);
     }
@@ -104,13 +97,14 @@ public class ComparisonCompactor {
                 .append(startingContext())
                 .append(DELTA_START)
                 .append(delta(s))
+                .append(DELTA_END)
                 .append(endingContext())
                 .append(endingElipsis())
                 .toString();
     }
 
     private String startingElipsis() {
-        return prefixLength > contextLength ? ELLIPSIS: "";
+        return prefixLength > contextLength ? ELLIPSIS : "";
     }
 
     private String startingContext() {
@@ -119,7 +113,7 @@ public class ComparisonCompactor {
         return expected.substring(contextStart, contextEnd);
     }
 
-    private String delta (String s) {
+    private String delta(String s) {
         int deltaStart = prefixLength;
         int deltaEnd = s.length() - suffixLength;
         return s.substring(deltaStart, deltaEnd);
@@ -132,6 +126,6 @@ public class ComparisonCompactor {
     }
 
     private String endingElipsis() {
-        return suffixLength > contextLength ? ELLIPSIS: "";
+        return suffixLength > contextLength ? ELLIPSIS : "";
     }
 }
