@@ -95,4 +95,41 @@ public class ComparisonCompactor {
     private boolean areStringsEqual() {
         return expected.equals(actual);
     }
+
+    private String compact(String s) {
+        return new StringBuilder()
+                .append(startingElipsis())
+                .append(startingContext())
+                .append(DELTA_START)
+                .append(delta(s))
+                .append(endingContext())
+                .append(endingElipsis())
+                .toString();
+    }
+
+    private String startingElipsis() {
+        return prefixLength > contextLength ? ELLIPSIS: "";
+    }
+
+    private String startingContext() {
+        int contextStart = Math.max(0, prefixLength - contextLength);
+        int contextEnd = prefixLength;
+        return expected.substring(contextStart, contextEnd);
+    }
+
+    private String delta (String s) {
+        int deltaStart = prefixLength;
+        int deltaEnd = s.length() - suffixLength;
+        return s.substring(deltaStart, deltaEnd);
+    }
+
+    private String endingContext() {
+        int contextStart = expected.length() - suffixLength;
+        int contextEnd = Math.min(contextStart + contextLength, expected.length());
+        return expected.substring(contextStart, contextEnd);
+    }
+
+    private String endingElipsis() {
+        return suffixLength > contextLength ? ELLIPSIS: "";
+    }
 }
