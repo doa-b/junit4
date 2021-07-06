@@ -6,9 +6,9 @@ public class ComparisonCompactor {
     private static final String DELTA_END = "]";
     private static final String DELTA_START = "[";
 
-    private int contextLength;
-    private String expected;
-    private String actual;
+    private final int contextLength;
+    private final String expected;
+    private final String actual;
     private int prefixLength;
     private int suffixLength;
 
@@ -38,14 +38,6 @@ public class ComparisonCompactor {
         return expected == null || actual == null || expected.equals(actual);
     }
 
-    private String compactString(String source) {
-        return computeCommonPrefix() +
-                DELTA_START +
-                source.substring(prefixLength, source.length() - suffixLength) +
-                DELTA_END +
-                computeCommonSuffix();
-    }
-
     private void findCommonPrefixAndSuffix() {
         findCommonPrefix();
         suffixLength = 0;
@@ -73,34 +65,14 @@ public class ComparisonCompactor {
         return s.charAt((s.length() - i - 1));
     }
 
-
-    private String computeCommonPrefix() {
-        return (prefixLength > contextLength ? ELLIPSIS : "") + expected.substring(Math.max(0, prefixLength - contextLength), prefixLength);
-    }
-
-    private String computeCommonSuffix() {
-        int end = Math.min(expected.length() - suffixLength + contextLength, expected.length());
-        return
-                expected.substring(expected.length() - suffixLength, end) +
-                        (expected.length() - suffixLength <
-                                expected.length() - contextLength ?
-                                ELLIPSIS : "");
-    }
-
-    private boolean areStringsEqual() {
-        return expected.equals(actual);
-    }
-
     private String compact(String s) {
-        return new StringBuilder()
-                .append(startingElipsis())
-                .append(startingContext())
-                .append(DELTA_START)
-                .append(delta(s))
-                .append(DELTA_END)
-                .append(endingContext())
-                .append(endingElipsis())
-                .toString();
+        return startingElipsis() +
+                startingContext() +
+                DELTA_START +
+                delta(s) +
+                DELTA_END +
+                endingContext() +
+                endingElipsis();
     }
 
     private String startingElipsis() {
